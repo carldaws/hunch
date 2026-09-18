@@ -1150,3 +1150,168 @@ SignupTest: test_blank_optional_fields_skip_the_API_entirely
 SignupTest: test_invalid_when_the_bio_reads_like_spam
 -----------------------------------------------------
   [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.1ms)[0m  [1m[34mSELECT * FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = ? ORDER BY "ar_internal_metadata"."key" ASC LIMIT 1[0m  [[nil, "schema_sha1"]]
+  [1m[36mActiveRecord::SchemaMigration Load (0.0ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN immediate TRANSACTION[0m
+  [1m[35m (0.1ms)[0m  [1m[35mPRAGMA foreign_keys[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA defer_foreign_keys[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA defer_foreign_keys = ON[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys = OFF[0m
+  [1m[36mFixtures Load (0.1ms)[0m  [1m[31mDELETE FROM "comments";
+DELETE FROM "orders";
+DELETE FROM "signups";
+DELETE FROM "tickets";
+INSERT INTO "comments" ("id", "body", "created_at", "status", "updated_at") VALUES (980190962, 'MyText', '2026-09-18 23:14:20.935648', 1, '2026-09-18 23:14:20.935648'), (298486374, 'MyText', '2026-09-18 23:14:20.935648', 1, '2026-09-18 23:14:20.935648');
+INSERT INTO "orders" ("id", "created_at", "reference", "status", "updated_at") VALUES (980190962, '2026-09-18 23:14:20.936071', 'MyString', 1, '2026-09-18 23:14:20.936071'), (298486374, '2026-09-18 23:14:20.936071', 'MyString', 1, '2026-09-18 23:14:20.936071');
+INSERT INTO "signups" ("id", "bio", "created_at", "display_name", "email", "updated_at") VALUES (980190962, 'A person.', '2026-09-18 23:14:20.936283', 'One Person', 'one@example.com', '2026-09-18 23:14:20.936283');
+INSERT INTO "tickets" ("id", "body", "created_at", "subject", "team", "updated_at") VALUES (980190962, 'MyText', '2026-09-18 23:14:20.936490', 'MyString', 'MyString', '2026-09-18 23:14:20.936490'), (298486374, 'MyText', '2026-09-18 23:14:20.936490', 'MyString', 'MyString', '2026-09-18 23:14:20.936490')[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA defer_foreign_keys = 0[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_keys = 1[0m
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[36mCOMMIT TRANSACTION[0m
+  [1m[35m (0.0ms)[0m  [1m[35mPRAGMA foreign_key_check[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+-----------------------------------------------------
+SignupTest: test_invalid_when_the_bio_reads_like_spam
+-----------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+---------------------------------------
+SignupTest: test_api_failure_fails_open
+---------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+-------------------------------------------------------------------
+SignupTest: test_valid_when_the_fields_read_like_a_human_wrote_them
+-------------------------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+------------------------------------------------------------
+SignupTest: test_blank_optional_fields_skip_the_API_entirely
+------------------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+-----------------------------------------------------
+ErrorTriageTest: test_pages_when_the_error_rates_page
+-----------------------------------------------------
+[pagerduty] paging on-call: RuntimeError: payments are down
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+------------------------------------------------
+ErrorTriageTest: test_stays_quiet_on_known_noise
+------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+----------------------------------------------------------------------
+WebhookDeliveryJobTest: test_gives_up_when_the_failure_looks_permanent
+----------------------------------------------------------------------
+[ActiveJob] [WebhookDeliveryJob] [d7a93171-f31f-43a0-81e0-9de52fd3d4fe] Performing WebhookDeliveryJob (Job ID: d7a93171-f31f-43a0-81e0-9de52fd3d4fe) from Test(default) with arguments: "https://example.com/hook", {id: 1}
+[ActiveJob] [WebhookDeliveryJob] [d7a93171-f31f-43a0-81e0-9de52fd3d4fe] giving up on webhook: 404 endpoint not found
+[ActiveJob] [WebhookDeliveryJob] [d7a93171-f31f-43a0-81e0-9de52fd3d4fe] Performed WebhookDeliveryJob (Job ID: d7a93171-f31f-43a0-81e0-9de52fd3d4fe) from Test(default) in 0.07ms
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+---------------------------------------------------------------------
+WebhookDeliveryJobTest: test_retries_when_the_failure_looks_transient
+---------------------------------------------------------------------
+[ActiveJob] [WebhookDeliveryJob] [d0fe33e9-5b07-49c2-8e3c-f4f97bae805c] Performing WebhookDeliveryJob (Job ID: d0fe33e9-5b07-49c2-8e3c-f4f97bae805c) from Test(default) with arguments: "https://example.com/hook", {id: 1}
+[ActiveJob] [WebhookDeliveryJob] [d0fe33e9-5b07-49c2-8e3c-f4f97bae805c] Enqueued WebhookDeliveryJob (Job ID: d0fe33e9-5b07-49c2-8e3c-f4f97bae805c) to Test(default) at 2026-09-18 23:14:50 UTC with arguments: "https://example.com/hook", {id: 1}
+[ActiveJob] [WebhookDeliveryJob] [d0fe33e9-5b07-49c2-8e3c-f4f97bae805c] Retrying WebhookDeliveryJob (Job ID: d0fe33e9-5b07-49c2-8e3c-f4f97bae805c) after 1 attempts in 30 seconds.
+[ActiveJob] [WebhookDeliveryJob] [d0fe33e9-5b07-49c2-8e3c-f4f97bae805c] Performed WebhookDeliveryJob (Job ID: d0fe33e9-5b07-49c2-8e3c-f4f97bae805c) from Test(default) in 3.13ms
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+---------------------------------------------------------------
+SortingMailboxTest: test_billing_email_becomes_a_billing_ticket
+---------------------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActiveStorage::Blob Create (0.1ms)[0m  [1m[32mINSERT INTO "active_storage_blobs" ("byte_size", "checksum", "content_type", "created_at", "filename", "key", "metadata", "service_name") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["byte_size", 322], ["checksum", "G7WIKj0ctQ+wiYNABpxLBg=="], ["content_type", "message/rfc822"], ["created_at", "2026-09-18 23:14:20.969257"], ["filename", "message.eml"], ["key", "nd3zxcswglpr4bjmzuzjcca099hu"], ["metadata", "{\"identified\":true}"], ["service_name", "test"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[36m  Disk Storage (0.2ms) [0m[32mUploaded file to key: nd3zxcswglpr4bjmzuzjcca099hu (checksum: G7WIKj0ctQ+wiYNABpxLBg==)[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActionMailbox::InboundEmail Create (0.1ms)[0m  [1m[32mINSERT INTO "action_mailbox_inbound_emails" ("created_at", "message_checksum", "message_id", "status", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["created_at", "2026-09-18 23:14:20.971293"], ["message_checksum", "65799e0cf62eb133e114429c08b8cf6c6ca3a7b3"], ["message_id", "6aadc5cce9a28_14079e08556d@Carls-MacBook-Pro.local.mail"], ["status", 1], ["updated_at", "2026-09-18 23:14:20.971293"]]
+  [1m[36mActiveStorage::Blob Load (0.0ms)[0m  [1m[34mSELECT "active_storage_blobs".* FROM "active_storage_blobs" INNER JOIN "active_storage_attachments" ON "active_storage_blobs"."id" = "active_storage_attachments"."blob_id" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"], ["name", "raw_email"], ["LIMIT", 1]]
+  [1m[36mActiveStorage::Attachment Load (0.0ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"], ["name", "raw_email"], ["LIMIT", 1]]
+  [1m[36mActiveStorage::Attachment Create (0.0ms)[0m  [1m[32mINSERT INTO "active_storage_attachments" ("blob_id", "created_at", "name", "record_id", "record_type") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["blob_id", 1], ["created_at", "2026-09-18 23:14:20.982478"], ["name", "raw_email"], ["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"]]
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["updated_at", "2026-09-18 23:14:20.982654"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActiveStorage::Blob Update (0.0ms)[0m  [1m[33mUPDATE "active_storage_blobs" SET "metadata" = ? WHERE "active_storage_blobs"."id" = ?[0m  [["metadata", "{\"identified\":true,\"analyzed\":true}"], ["id", 1]]
+  [1m[36mActiveStorage::Attachment Load (0.0ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."blob_id" = ?[0m  [["blob_id", 1]]
+  [1m[36mActionMailbox::InboundEmail Load (0.0ms)[0m  [1m[34mSELECT "action_mailbox_inbound_emails".* FROM "action_mailbox_inbound_emails" WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["id", 1]]
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["updated_at", "2026-09-18 23:14:20.985506"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[36m  Disk Storage (0.0ms) [0m[34mDownloaded file from key: nd3zxcswglpr4bjmzuzjcca099hu[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mTicket Create (0.1ms)[0m  [1m[32mINSERT INTO "tickets" ("body", "created_at", "subject", "team", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["body", "My payouts have been failing for 3 days."], ["created_at", "2026-09-18 23:14:20.988045"], ["subject", "Invoice is wrong"], ["team", "billing"], ["updated_at", "2026-09-18 23:14:20.988045"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "status" = ?, "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["status", 2], ["updated_at", "2026-09-18 23:14:20.988285"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[ActiveJob] Enqueued ActionMailbox::IncinerationJob (Job ID: 1a9dc6f7-829e-46e9-9cae-a4d535037486) to Test(default) at 2026-10-18 23:14:20 UTC with arguments: #<GlobalID:0x0000000127d77238 @uri=#<URI::GID gid://example/ActionMailbox::InboundEmail/1>>
+  [1m[36mTicket Load (0.0ms)[0m  [1m[34mSELECT "tickets".* FROM "tickets" ORDER BY "tickets"."id" DESC LIMIT ?[0m  [["LIMIT", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+---------------------------------------------------------
+SortingMailboxTest: test_spam_is_dropped_without_a_ticket
+---------------------------------------------------------
+  [1m[36mTicket Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "tickets"[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActiveStorage::Blob Create (0.1ms)[0m  [1m[32mINSERT INTO "active_storage_blobs" ("byte_size", "checksum", "content_type", "created_at", "filename", "key", "metadata", "service_name") VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING "id"[0m  [["byte_size", 294], ["checksum", "seWJL02hApA5hJaS7oaZ8w=="], ["content_type", "message/rfc822"], ["created_at", "2026-09-18 23:14:20.990104"], ["filename", "message.eml"], ["key", "osrps02hbrbmr4ibcveviwlaxgzu"], ["metadata", "{\"identified\":true}"], ["service_name", "test"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[36m  Disk Storage (0.2ms) [0m[32mUploaded file to key: osrps02hbrbmr4ibcveviwlaxgzu (checksum: seWJL02hApA5hJaS7oaZ8w==)[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActionMailbox::InboundEmail Create (0.1ms)[0m  [1m[32mINSERT INTO "action_mailbox_inbound_emails" ("created_at", "message_checksum", "message_id", "status", "updated_at") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["created_at", "2026-09-18 23:14:20.990538"], ["message_checksum", "55e6bd49467064509ae77da1184999ed31163c83"], ["message_id", "6aadc5ccf19ed_14079e0856dc@Carls-MacBook-Pro.local.mail"], ["status", 1], ["updated_at", "2026-09-18 23:14:20.990538"]]
+  [1m[36mActiveStorage::Blob Load (0.0ms)[0m  [1m[34mSELECT "active_storage_blobs".* FROM "active_storage_blobs" INNER JOIN "active_storage_attachments" ON "active_storage_blobs"."id" = "active_storage_attachments"."blob_id" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"], ["name", "raw_email"], ["LIMIT", 1]]
+  [1m[36mActiveStorage::Attachment Load (0.0ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."record_id" = ? AND "active_storage_attachments"."record_type" = ? AND "active_storage_attachments"."name" = ? LIMIT ?[0m  [["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"], ["name", "raw_email"], ["LIMIT", 1]]
+  [1m[36mActiveStorage::Attachment Create (0.0ms)[0m  [1m[32mINSERT INTO "active_storage_attachments" ("blob_id", "created_at", "name", "record_id", "record_type") VALUES (?, ?, ?, ?, ?) RETURNING "id"[0m  [["blob_id", 1], ["created_at", "2026-09-18 23:14:20.991193"], ["name", "raw_email"], ["record_id", 1], ["record_type", "ActionMailbox::InboundEmail"]]
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["updated_at", "2026-09-18 23:14:20.991314"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActiveStorage::Blob Update (0.0ms)[0m  [1m[33mUPDATE "active_storage_blobs" SET "metadata" = ? WHERE "active_storage_blobs"."id" = ?[0m  [["metadata", "{\"identified\":true,\"analyzed\":true}"], ["id", 1]]
+  [1m[36mActiveStorage::Attachment Load (0.0ms)[0m  [1m[34mSELECT "active_storage_attachments".* FROM "active_storage_attachments" WHERE "active_storage_attachments"."blob_id" = ?[0m  [["blob_id", 1]]
+  [1m[36mActionMailbox::InboundEmail Load (0.0ms)[0m  [1m[34mSELECT "action_mailbox_inbound_emails".* FROM "action_mailbox_inbound_emails" WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["id", 1]]
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["updated_at", "2026-09-18 23:14:20.991982"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[36m  Disk Storage (0.0ms) [0m[34mDownloaded file from key: osrps02hbrbmr4ibcveviwlaxgzu[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mActionMailbox::InboundEmail Update (0.0ms)[0m  [1m[33mUPDATE "action_mailbox_inbound_emails" SET "status" = ?, "updated_at" = ? WHERE "action_mailbox_inbound_emails"."id" = ?[0m  [["status", 2], ["updated_at", "2026-09-18 23:14:20.992473"], ["id", 1]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+[ActiveJob] Enqueued ActionMailbox::IncinerationJob (Job ID: c69c3ff8-8c64-4540-86d6-fbd7670f0c16) to Test(default) at 2026-10-18 23:14:20 UTC with arguments: #<GlobalID:0x0000000127e55f38 @uri=#<URI::GID gid://example/ActionMailbox::InboundEmail/1>>
+  [1m[36mTicket Count (0.0ms)[0m  [1m[34mSELECT COUNT(*) FROM "tickets"[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+--------------------------------------------------
+CommentTest: test_holds_heated_comments_for_review
+--------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Create (0.0ms)[0m  [1m[32mINSERT INTO "comments" ("body", "created_at", "status", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["body", "this take is embarrassingly wrong"], ["created_at", "2026-09-18 23:14:20.993443"], ["status", 0], ["updated_at", "2026-09-18 23:14:20.993443"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Update (0.0ms)[0m  [1m[33mUPDATE "comments" SET "status" = ?, "updated_at" = ? WHERE "comments"."id" = ?[0m  [["status", 2], ["updated_at", "2026-09-18 23:14:20.993676"], ["id", 980190963]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+------------------------------------------
+CommentTest: test_rejects_abusive_comments
+------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Create (0.0ms)[0m  [1m[32mINSERT INTO "comments" ("body", "created_at", "status", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["body", "…"], ["created_at", "2026-09-18 23:14:20.993981"], ["status", 0], ["updated_at", "2026-09-18 23:14:20.993981"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Update (0.0ms)[0m  [1m[33mUPDATE "comments" SET "status" = ?, "updated_at" = ? WHERE "comments"."id" = ?[0m  [["status", 3], ["updated_at", "2026-09-18 23:14:20.994196"], ["id", 980190963]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+------------------------------------------
+CommentTest: test_publishes_civil_comments
+------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Create (0.0ms)[0m  [1m[32mINSERT INTO "comments" ("body", "created_at", "status", "updated_at") VALUES (?, ?, ?, ?) RETURNING "id"[0m  [["body", "great write-up, thanks for sharing"], ["created_at", "2026-09-18 23:14:20.994487"], ["status", 0], ["updated_at", "2026-09-18 23:14:20.994487"]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mSAVEPOINT active_record_1[0m
+  [1m[36mComment Update (0.0ms)[0m  [1m[33mUPDATE "comments" SET "status" = ?, "updated_at" = ? WHERE "comments"."id" = ?[0m  [["status", 1], ["updated_at", "2026-09-18 23:14:20.994674"], ["id", 980190963]]
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mRELEASE SAVEPOINT active_record_1[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[36mBEGIN deferred TRANSACTION[0m
+-------------------------------------------------------
+OrderTest: test_coerces_messy_status_text_onto_the_enum
+-------------------------------------------------------
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[31mROLLBACK TRANSACTION[0m

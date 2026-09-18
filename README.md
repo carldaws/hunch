@@ -77,9 +77,9 @@ Several questions about one piece of state cost one API call:
 
 ```ruby
 result = Hunch.decide(given: mail.raw_source) do |q|
-  q.likely? :urgent, "does this convey urgency?", over: :probable
-  q.pick    :team, billing: "payments", technical: "bugs", sales: "pricing"
-  q.rate    :mood, :calm, :frustrated, :livid
+  q.probable? :urgent, "does this convey urgency?"
+  q.pick      :team, billing: "payments", technical: "bugs", sales: "pricing"
+  q.rate      :mood, :calm, :frustrated, :livid
 end
 
 result.urgent             # => 0.92

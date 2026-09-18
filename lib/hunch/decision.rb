@@ -6,9 +6,10 @@ module Hunch
       @questions = {}
     end
 
-    def likely?(key, question, yes: nil, no: nil, over: 0.5)
-      threshold = Hunch.configuration.resolve_level(over)
-      add Questions::Noul.new(key: key.to_sym, question:, yes:, no:, threshold:)
+    Configuration::LEVELS.each_key do |level|
+      define_method(:"#{level}?") do |key, question, yes: nil, no: nil|
+        noul(key, question, yes:, no:, threshold: Hunch.configuration.levels.fetch(level))
+      end
     end
 
     def pick(key, *options, question: nil, **described)
@@ -26,6 +27,29 @@ module Hunch
     end
 
     private
+
+    def custom_level(name)
+      return unless name.to_s.end_with?("?")
+
+      level = name.to_s.delete_suffix("?").to_sym
+      Hunch.configuration.levels.key?(level) ? level : nil
+    end
+
+    def method_missing(name, *args, **options)
+      level = custom_level(name)
+      return super unless level
+
+      key, question = args
+      noul(key, question, **options, threshold: Hunch.configuration.levels.fetch(level))
+    end
+
+    def respond_to_missing?(name, include_private = false)
+      !custom_level(name).nil? || super
+    end
+
+    def noul(key, question, yes: nil, no: nil, threshold:)
+      add Questions::Noul.new(key: key.to_sym, question:, yes:, no:, threshold:)
+    end
 
     def describe(bare, described)
       bare.to_h { |name| [name.to_sym, name.to_s.tr("_", " ")] }.merge(described)

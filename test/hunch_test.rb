@@ -39,12 +39,11 @@ class HunchTest < Minitest::Test
     assert_raises(NoMethodError) { Hunch.sure_ish?("is it?", given: "state") }
   end
 
-  def test_batch_threshold_rejects_unknown_level_names
+  def test_batch_rejects_unknown_predicates
     stub_backend(fraud: 0.7)
-    error = assert_raises(Hunch::ConfigurationError) do
-      Hunch.decide(given: "order") { |q| q.likely? :fraud, "fraud?", over: :sure_ish }
+    assert_raises(NoMethodError) do
+      Hunch.decide(given: "order") { |q| q.sure_ish? :fraud, "fraud?" }
     end
-    assert_match(/known levels/, error.message)
   end
 
   def test_pick_with_described_options
@@ -109,13 +108,20 @@ class HunchTest < Minitest::Test
     assert_in_delta 0.85, result.team_confidence
   end
 
-  def test_per_question_threshold_in_a_batch
+  def test_batch_predicates_set_each_questions_threshold
     stub_backend(fraud: 0.7)
     result = Hunch.decide(given: "order") do |q|
-      q.likely? :fraud, "is this fraudulent?", over: :almost_certain
+      q.almost_certain? :fraud, "is this fraudulent?"
     end
 
     assert_in_delta 0.7, result.fraud
+    refute result.fraud?
+  end
+
+  def test_batch_custom_level_predicates
+    Hunch.configure { |c| c.levels[:paranoid] = 0.99 }
+    stub_backend(fraud: 0.95)
+    result = Hunch.decide(given: "order") { |q| q.paranoid? :fraud, "fraud?" }
     refute result.fraud?
   end
 
