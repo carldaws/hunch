@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email = ["carldawson@hey.com"]
 
   spec.summary = "Probabilistic control flow for Ruby"
-  spec.description = "likely?, pick, and score: three primitives that let Ruby branch on judgment calls, " \
+  spec.description = "chance, pick, and rate: three primitives that let Ruby branch on judgment calls, " \
                      "answered by TypeSafe's Jev System One model or any backend you plug in."
   spec.homepage = "https://github.com/carldaws/hunch"
   spec.license = "MIT"
