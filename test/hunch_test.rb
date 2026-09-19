@@ -14,17 +14,22 @@ class HunchTest < Minitest::Test
   end
 
   def test_the_predicate_family_collapses_at_each_level
-    stub_backend(answer: 0.8)
-    assert Hunch.possible?("is it?", given: "state")
-    assert Hunch.likely?("is it?", given: "state")
-    assert Hunch.probable?("is it?", given: "state")
-    refute Hunch.almost_certain?("is it?", given: "state")
+    { possibly?: 0.25, likely?: 0.5, probably?: 0.75, almost_certainly?: 0.93 }.each do |predicate, threshold|
+      stub_backend(answer: threshold)
+      assert Hunch.public_send(predicate, "is it?", given: "state"), predicate
+
+      stub_backend(answer: threshold - 0.01)
+      refute Hunch.public_send(predicate, "is it?", given: "state"), predicate
+    end
   end
 
   def test_default_thresholds_are_adjustable
-    Hunch.configure { |c| c.levels[:probable] = 0.9 }
+    Hunch.configure { |c| c.levels[:probably] = 0.9 }
     stub_backend(answer: 0.8)
-    refute Hunch.probable?("is it?", given: "state")
+    refute Hunch.probably?("is it?", given: "state")
+
+    result = Hunch.decide(given: "state") { |q| q.probably? :answer, "is it?" }
+    refute result.answer?
   end
 
   def test_custom_levels_become_predicates
@@ -109,13 +114,17 @@ class HunchTest < Minitest::Test
   end
 
   def test_batch_predicates_set_each_questions_threshold
-    stub_backend(fraud: 0.7)
-    result = Hunch.decide(given: "order") do |q|
-      q.almost_certain? :fraud, "is this fraudulent?"
-    end
+    { possibly?: 0.25, likely?: 0.5, probably?: 0.75, almost_certainly?: 0.93 }.each do |predicate, threshold|
+      stub_backend(at_threshold: threshold, below_threshold: threshold - 0.01)
+      result = Hunch.decide(given: "order") do |q|
+        q.public_send(predicate, :at_threshold, "is this fraudulent?")
+        q.public_send(predicate, :below_threshold, "is this fraudulent?")
+      end
 
-    assert_in_delta 0.7, result.fraud
-    refute result.fraud?
+      assert_in_delta threshold, result.at_threshold
+      assert result.at_threshold?, predicate
+      refute result.below_threshold?, predicate
+    end
   end
 
   def test_batch_custom_level_predicates

@@ -7,7 +7,7 @@ three moves for judgment calls. Every question is a conditional probability —
 _how likely is this, given that_ — and the API reads that way:
 
 ```ruby
-if Hunch.almost_certain?("this order is fraudulent", given: order.attributes)
+if Hunch.almost_certainly?("this order is fraudulent", given: order.attributes)
   order.hold!
 end
 ```
@@ -40,14 +40,17 @@ Hunch.chance("written by a real human, not spam", given: bio)  # => 0.87
 Named levels collapse it into predicates:
 
 ```ruby
-Hunch.possible?("fraudulent", given: order)        # chance >= 0.25
-Hunch.likely?("fraudulent", given: order)          # chance >= 0.5
-Hunch.probable?("fraudulent", given: order)        # chance >= 0.75
-Hunch.almost_certain?("fraudulent", given: order)  # chance >= 0.93
+Hunch.possibly?("fraudulent", given: order)         # chance >= 0.25
+Hunch.likely?("fraudulent", given: order)           # chance >= 0.5
+Hunch.probably?("fraudulent", given: order)         # chance >= 0.75
+Hunch.almost_certainly?("fraudulent", given: order) # chance >= 0.93
 
 Hunch.configure { |c| c.levels[:paranoid] = 0.99 }
 Hunch.paranoid?("fraudulent", given: order)        # chance >= 0.99
 ```
+
+Configure built-in thresholds with the matching level names, for example
+`Hunch.configure { |c| c.levels[:probably] = 0.8 }`.
 
 **`pick`** answers _which_:
 
@@ -77,13 +80,13 @@ Several questions about one piece of state cost one API call:
 
 ```ruby
 result = Hunch.decide(given: mail.raw_source) do |q|
-  q.probable? :urgent, "does this convey urgency?"
+  q.probably? :urgent, "does this convey urgency?"
   q.pick      :team, billing: "payments", technical: "bugs", sales: "pricing"
   q.rate      :mood, :calm, :frustrated, :livid
 end
 
 result.urgent             # => 0.92
-result.urgent?            # => true, past :probable
+result.urgent?            # => true, at or above :probably
 result.team               # => :technical
 result.team_probabilities # => { billing: 0.08, technical: 0.85, sales: 0.07 }
 result.mood.level         # => :livid
@@ -117,7 +120,7 @@ class Signup < ApplicationRecord
 
   def bio_reads_like_a_human
     return if bio.blank?
-    return if Hunch.probable?("a genuine human bio, not spam or keyword stuffing", given: bio)
+    return if Hunch.probably?("a genuine human bio, not spam or keyword stuffing", given: bio)
 
     errors.add(:bio, "reads like spam")
   rescue Hunch::APIError

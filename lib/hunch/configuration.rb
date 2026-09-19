@@ -1,6 +1,6 @@
 module Hunch
   class Configuration
-    LEVELS = { possible: 0.25, likely: 0.5, probable: 0.75, almost_certain: 0.93 }.freeze
+    LEVELS = { possibly: 0.25, likely: 0.5, probably: 0.75, almost_certainly: 0.93 }.freeze
 
     attr_accessor :api_key, :model, :url, :timeout, :open_timeout, :max_retries, :levels
     attr_writer :backend
@@ -24,7 +24,7 @@ module Hunch
           raise ConfigurationError, "unknown level #{value.inspect}; known levels: #{levels.keys.join(", ")}"
         end
       else
-        raise ArgumentError, "at_least must be a number or a level name"
+        raise ArgumentError, "level must be a number or a level name"
       end
     end
 

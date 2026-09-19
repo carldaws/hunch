@@ -39,7 +39,7 @@ module Hunch
           when true then 1.0
           when false then 0.0
           when Numeric then value.to_f
-          else raise ArgumentError, "noul stub must be true, false, or a probability"
+          else raise ArgumentError, "chance stub must be true, false, or a probability"
           end
         { "type" => "noul", "noul" => probability }
       end
@@ -49,7 +49,7 @@ module Hunch
           case value
           when Symbol then question.options.keys.to_h { |option| [option.to_s, option == value ? 1.0 : 0.0] }
           when Hash then value.transform_keys(&:to_s).transform_values(&:to_f)
-          else raise ArgumentError, "choice stub must be a symbol or a probabilities hash"
+          else raise ArgumentError, "pick stub must be a symbol or a probabilities hash"
           end
         winner = probabilities.max_by { |_, p| p }.first
         { "type" => "choice", "choice" => winner, "probabilities" => probabilities, "confidence" => probabilities[winner] }

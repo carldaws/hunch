@@ -22,7 +22,7 @@ class Signup
 
   def bio_reads_like_a_human
     return if bio.blank?
-    return if Hunch.probable?("a genuine human bio, not spam or keyword stuffing", given: bio)
+    return if Hunch.probably?("a genuine human bio, not spam or keyword stuffing", given: bio)
 
     errors.add(:bio, "reads like spam")
   rescue Hunch::APIError

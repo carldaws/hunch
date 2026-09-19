@@ -15,17 +15,17 @@ state = "Subject: URGENT - payouts failing\n\nHelp! My payouts have been failing
         "If this isn't fixed by Friday I'm moving to your competitor."
 
 result = Hunch.decide(given: state) do |q|
-  q.likely? :urgent, "does this convey urgency?", over: :probable
+  q.probably? :urgent, "does this convey urgency?"
   q.likely? :churn_risk, "does the sender threaten to leave?"
   q.pick :team, billing: "payments, invoices, refunds", technical: "bugs and outages", sales: "pricing and upgrades"
   q.rate :mood, :calm, :frustrated, :livid
 end
 
 puts "model:      #{result.model}"
-puts "urgent:     #{result.urgent.round(3)} (past :probable? #{result.urgent?})"
+puts "urgent:     #{result.urgent.round(3)} (at or above :probably? #{result.urgent?})"
 puts "churn_risk: #{result.churn_risk.round(3)}"
 puts "team:       #{result.team} #{result.team_probabilities.transform_values { |p| p.round(3) }}"
 puts "mood:       #{result.mood.inspect} probabilities=#{result.mood.probabilities.transform_values { |p| p.round(3) }}"
 puts
-puts "single-shot: almost_certain?(urgency) => #{Hunch.almost_certain?("does this convey urgency?", given: state)}"
+puts "single-shot: almost_certainly?(urgency) => #{Hunch.almost_certainly?("does this convey urgency?", given: state)}"
 puts "usage:      #{result.usage.inspect}"
