@@ -2,9 +2,8 @@
 
 Probabilistic control flow for Ruby.
 
-Ruby gives you `if`, `case`, and `<=>` for facts. Hunch gives you the same
-three moves for judgment calls. Every question is a conditional probability —
-_how likely is this, given that_ — and the API reads that way:
+Hunch lets you ask questions about text or application data and use the
+answers in your Ruby code.
 
 ```ruby
 if Hunch.almost_certainly?("this order is fraudulent", given: order.attributes)
@@ -12,10 +11,11 @@ if Hunch.almost_certainly?("this order is fraudulent", given: order.attributes)
 end
 ```
 
-The English is the configuration. No prompts, no parsing, no tuning DSL.
-Answers come from [TypeSafe's Jev](https://typesafe.ai), a System One model:
-a single fast parallel pass that returns typed, calibrated probabilities
-instead of text — fast and cheap enough to sit inside a request cycle.
+You can get a probability, choose between options, or rate something on a
+scale. Questions are written in plain English; answers come back as Ruby values.
+
+Hunch uses [TypeSafe's Jev](https://typesafe.ai). You can call it directly
+or through OpenRouter.
 
 ## Installation
 
@@ -29,15 +29,15 @@ Hunch.configure do |config|
 end
 ```
 
-## The three primitives
+## Usage
 
-**`chance`** answers _whether_, as a probability:
+**`chance`** returns a probability between 0 and 1:
 
 ```ruby
 Hunch.chance("written by a real human, not spam", given: bio)  # => 0.87
 ```
 
-Named levels collapse it into predicates:
+Use a named threshold when you want a boolean:
 
 ```ruby
 Hunch.possibly?("fraudulent", given: order)         # chance >= 0.25
@@ -45,14 +45,14 @@ Hunch.likely?("fraudulent", given: order)           # chance >= 0.5
 Hunch.probably?("fraudulent", given: order)         # chance >= 0.75
 Hunch.almost_certainly?("fraudulent", given: order) # chance >= 0.93
 
-Hunch.configure { |c| c.levels[:paranoid] = 0.99 }
-Hunch.paranoid?("fraudulent", given: order)        # chance >= 0.99
+Hunch.configure { |c| c.levels[:definitely] = 0.99 }
+Hunch.definitely?("fraudulent", given: order)        # chance >= 0.99
 ```
 
 Configure built-in thresholds with the matching level names, for example
 `Hunch.configure { |c| c.levels[:probably] = 0.8 }`.
 
-**`pick`** answers _which_:
+**`pick`** chooses one of the options you provide:
 
 ```ruby
 Hunch.pick(:ham, :spam, given: email)                                  # => :spam
@@ -60,7 +60,7 @@ Hunch.pick(urgent: "needs a reply today", routine: "can wait",
            given: ticket)                                              # => :routine
 ```
 
-**`rate`** answers _how much_, on an ordered scale:
+**`rate`** returns a rating with a position on an ordered scale:
 
 ```ruby
 mood = Hunch.rate(:calm, :frustrated, :livid, given: email)
@@ -69,14 +69,16 @@ mood.position   # => 1.4
 mood >= :livid  # => false
 ```
 
-If shuffling the options wouldn't change their meaning, use `pick`; if they
-form a ladder, use `rate`. Options are bare symbols or `symbol: "description"`,
-mixed freely, plus an optional `question:` when the options alone don't carry
-it. The keywords `given` and `question` are reserved.
+Use `pick` for categories such as billing, support, and sales. Use `rate`
+for ordered levels such as low, medium, and high.
+
+Both accept symbols or `symbol: "description"` pairs, or a mix of the two.
+Add `question:` if the options need more context. `given:` supplies the data
+to evaluate. These two keywords are reserved and can't be used as option names.
 
 ## Batching
 
-Several questions about one piece of state cost one API call:
+Use `Hunch.decide` to ask several questions about the same data in one API call:
 
 ```ruby
 result = Hunch.decide(given: mail.raw_source) do |q|
@@ -94,13 +96,11 @@ result.mood.level         # => :livid
 
 ## In a Rails app
 
-Everything below is lifted from [`example/`](example), a Rails app in this
-repo — its test suite covers each snippet, and all of them have been run
-against the live model.
+The [`example/`](example) Rails app contains these examples and their tests.
 
 ### Validations
 
-A validation method is just an `if`:
+Check a display name and bio during validation:
 
 ```ruby
 class Signup < ApplicationRecord
@@ -136,13 +136,13 @@ signup.valid?          # => false
 signup.errors[:bio]    # => ["reads like spam"]
 ```
 
-The `rescue nil` is a deliberate policy: if the API is unreachable at save
-time, the record saves anyway. Fail closed instead where it matters more,
-like a spam gate.
+These validations rescue `Hunch::APIError`, so an API failure adds no
+validation error. Other validations, including the email presence check,
+still apply.
 
 ### Inbound email
 
-ActionMailbox routing without the regex graveyard:
+Route incoming email by its contents:
 
 ```ruby
 class SortingMailbox < ApplicationMailbox
@@ -162,7 +162,7 @@ end
 
 ### Error triage
 
-Replace the hand-maintained ignore-list with one judgment:
+Choose whether to ignore an error, send a notification, or page someone:
 
 ```ruby
 class ErrorTriage
@@ -189,7 +189,7 @@ end
 
 ### Job retries
 
-Exception classes don't tell you whether a failure is transient. Ask:
+Use the error message and attempt count to decide whether to retry:
 
 ```ruby
 class WebhookDeliveryJob < ApplicationJob
@@ -208,12 +208,9 @@ class WebhookDeliveryJob < ApplicationJob
 end
 ```
 
-A `503 upstream timeout` retries; a `404 endpoint not found` doesn't.
-
 ### Enum coercion
 
-Messy import data, typed by construction — `pick` can only return one of
-your enum's values:
+Map imported text to an existing enum value:
 
 ```ruby
 class Order < ApplicationRecord
@@ -249,17 +246,21 @@ end
 
 ## Testing
 
-The stub backend is just another backend:
+Use the stub backend to supply answers without making API calls:
 
 ```ruby
 Hunch.backend = Hunch::Backends::Stub.new(fraud: 0.95, team: :billing, mood: :calm)
 ```
 
-Stub values are keyed by question key (`:answer` for the single-shot
-methods) and follow the question type: a probability or boolean for chance
-and its predicates, a symbol or probabilities hash for `pick`, a level
-symbol or position for `rate`. Unstubbed questions raise unless you pass
-`default:`. The stub records `calls` for assertions:
+Use the question's key to supply its answer, or `:answer` for calls outside
+a `Hunch.decide` block. Stub values depend on the method:
+
+- `chance` and its predicates: a probability or boolean.
+- `pick`: a symbol or a hash of probabilities.
+- `rate`: a level symbol or numeric position.
+
+Missing answers raise unless you supply `default:`. The stub records each
+call in `calls` for assertions.
 
 ```ruby
 test "spam is dropped without a ticket" do
@@ -280,15 +281,19 @@ Hunch.configure do |config|
   config.timeout = 5
   config.open_timeout = 2
   config.max_retries = 2          # 429/5xx/timeouts, with backoff, honours Retry-After
-  config.levels[:paranoid] = 0.99
+  config.levels[:definitely] = 0.99
 end
 ```
 
-### Via OpenRouter
+## Backends
 
-Jev speaks the same wire format through
-[OpenRouter's Decisions endpoint](https://openrouter.ai/typesafe), so an
-OpenRouter key works today without the TypeSafe waitlist:
+Hunch includes a Jev backend, used by default, and a stub backend for
+[testing](#testing).
+
+### OpenRouter
+
+To call Jev through [OpenRouter](https://openrouter.ai/typesafe), set your
+API key, URL, and model:
 
 ```ruby
 Hunch.configure do |config|
@@ -297,15 +302,6 @@ Hunch.configure do |config|
   config.model = "typesafe/jev-1.13"
 end
 ```
-
-## Honesty about backends
-
-The interface is uniform; the guarantees are not. Jev's probabilities are
-calibrated, its answers are typed by construction, and it responds in
-milliseconds. A future LLM backend can implement the same three primitives,
-but its confidences are estimates, not calibrated probabilities, and it is
-orders of magnitude slower and more expensive. Same interface, different
-guarantees — choose accordingly.
 
 ## License
 
