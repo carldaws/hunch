@@ -163,10 +163,8 @@ class HunchTest < Minitest::Test
     assert_equal %i[urgent], result.to_h.keys
   end
 
-  def test_unknown_backend_symbol_raises
-    Hunch.backend = :nope
-    assert_raises(Hunch::ConfigurationError) do
-      Hunch.chance("question?", given: "state")
-    end
+  def test_missing_backend_raises
+    error = assert_raises(Hunch::ConfigurationError) { Hunch.chance("question?", given: "state") }
+    assert_match(/no backend/, error.message)
   end
 end

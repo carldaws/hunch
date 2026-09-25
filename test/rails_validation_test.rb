@@ -54,7 +54,7 @@ class RailsValidationTest < Minitest::Test
 
   def test_api_failure_fails_open
     failing = Object.new
-    def failing.decide(state:, questions:, model: nil) = raise Hunch::TimeoutError, "timed out"
+    def failing.decide(state:, questions:) = raise Hunch::TimeoutError, "timed out"
     Hunch.backend = failing
 
     assert_predicate Signup.new(email: "carl@example.com", bio: "whatever"), :valid?

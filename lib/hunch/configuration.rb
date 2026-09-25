@@ -2,16 +2,10 @@ module Hunch
   class Configuration
     LEVELS = { possibly: 0.25, likely: 0.5, probably: 0.75, almost_certainly: 0.93 }.freeze
 
-    attr_accessor :api_key, :model, :url, :timeout, :open_timeout, :max_retries, :levels
+    attr_accessor :levels
     attr_writer :backend
 
     def initialize
-      @api_key = ENV["TYPESAFE_API_KEY"]
-      @model = "jev-latest"
-      @url = "https://api.typesafe.ai/v1/systemone"
-      @timeout = 5
-      @open_timeout = 2
-      @max_retries = 2
       @levels = LEVELS.dup
       @backend = nil
     end
@@ -29,18 +23,8 @@ module Hunch
     end
 
     def backend
-      @backend = resolve(@backend)
-    end
-
-    private
-
-    def resolve(backend)
-      case backend
-      when nil, :jev then Backends::Jev.new(self)
-      when :stub then Backends::Stub.new
-      when Symbol then raise ConfigurationError, "unknown backend #{backend.inspect}"
-      else backend
-      end
+      @backend or raise ConfigurationError,
+        "no backend: Hunch.configure { |c| c.backend = Hunch::Backends::SystemOne.new(url:, api_key:, model:) }"
     end
   end
 end

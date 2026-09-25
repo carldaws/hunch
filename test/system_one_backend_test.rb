@@ -1,7 +1,7 @@
 require "test_helper"
 require "json"
 
-class JevBackendTest < Minitest::Test
+class SystemOneBackendTest < Minitest::Test
   include StubHelpers
 
   RESPONSE = {
@@ -30,10 +30,9 @@ class JevBackendTest < Minitest::Test
     decision.questions
   end
 
-  def backend(transport:, sleeper: ->(_s) {})
-    config = Hunch::Configuration.new
-    config.api_key = "test-key"
-    Hunch::Backends::Jev.new(config, transport:, sleeper:)
+  def backend(transport:, sleeper: ->(_s) {}, api_key: "test-key")
+    Hunch::Backends::SystemOne.new(url: "https://example.test/decisions", api_key:, model: "typesafe/jev-1.13",
+                                   transport:, sleeper:)
   end
 
   def test_payload_matches_the_wire_format
@@ -42,7 +41,7 @@ class JevBackendTest < Minitest::Test
     jev.decide(state: "Help! Payouts failing.", questions: questions)
 
     assert_equal "Help! Payouts failing.", sent["state"]
-    assert_equal "jev-latest", sent["model"]
+    assert_equal "typesafe/jev-1.13", sent["model"]
     assert_equal %w[urgent team mood], sent["questions"].keys
 
     urgent = sent["questions"]["urgent"]
@@ -110,9 +109,10 @@ class JevBackendTest < Minitest::Test
   end
 
   def test_missing_api_key_raises_configuration_error
-    config = Hunch::Configuration.new
-    config.api_key = nil
-    jev = Hunch::Backends::Jev.new(config)
-    assert_raises(Hunch::ConfigurationError) { jev.decide(state: "s", questions: questions) }
+    [nil, ""].each do |api_key|
+      jev = backend(transport: ->(_p) { flunk "no request without a key" }, api_key:)
+      error = assert_raises(Hunch::ConfigurationError) { jev.decide(state: "s", questions: questions) }
+      assert_equal "no API key for https://example.test/decisions", error.message
+    end
   end
 end

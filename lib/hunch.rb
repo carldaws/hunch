@@ -5,7 +5,7 @@ require_relative "hunch/rating"
 require_relative "hunch/configuration"
 require_relative "hunch/decision"
 require_relative "hunch/result"
-require_relative "hunch/backends/jev"
+require_relative "hunch/backends/system_one"
 require_relative "hunch/backends/stub"
 
 module Hunch
@@ -32,13 +32,7 @@ module Hunch
       yield decision
       raise ArgumentError, "decide needs at least one question" if decision.questions.empty?
 
-      raw = configuration.backend.decide(state: given, questions: decision.questions, model: configuration.model)
-      Result.new(
-        questions: decision.questions,
-        answers: raw["answers"] || {},
-        model: raw["model"],
-        usage: raw["usage"]
-      )
+      ask(decision.questions, given)
     end
 
     def chance(question, given:, yes: nil, no: nil)
@@ -60,6 +54,11 @@ module Hunch
     end
 
     private
+
+    def ask(questions, state)
+      raw = configuration.backend.decide(state:, questions:)
+      Result.new(questions:, answers: raw["answers"] || {}, model: raw["model"], usage: raw["usage"])
+    end
 
     def custom_level(name)
       return unless name.to_s.end_with?("?")

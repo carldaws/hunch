@@ -6,9 +6,11 @@ key = ENV["OPENROUTER_API_KEY"] || (File.read(File.expand_path(ARGV[0])).strip i
 abort "usage: bin/live_check <path-to-key-file>  (or set OPENROUTER_API_KEY)" unless key
 
 Hunch.configure do |config|
-  config.api_key = key
-  config.url = "https://openrouter.ai/api/alpha/decisions"
-  config.model = "typesafe/jev-1.13"
+  config.backend = Hunch::Backends::SystemOne.new(
+    url: "https://openrouter.ai/api/alpha/decisions",
+    api_key: key,
+    model: "typesafe/jev-1.13"
+  )
 end
 
 state = "Subject: URGENT - payouts failing\n\nHelp! My payouts have been failing for 3 days and my rent is due. " \

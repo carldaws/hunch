@@ -14,8 +14,8 @@ end
 You can get a probability, choose between options, or rate something on a
 scale. Questions are written in plain English; answers come back as Ruby values.
 
-Hunch uses [TypeSafe's Jev](https://typesafe.ai). You can call it directly
-or through OpenRouter.
+Hunch asks a System One model, such as [TypeSafe's Jev](https://typesafe.ai),
+which answers with calibrated probabilities rather than text.
 
 ## Installation
 
@@ -23,9 +23,17 @@ or through OpenRouter.
 gem "hunch"
 ```
 
+Point Hunch at a System One endpoint. Jev is available through
+[OpenRouter](https://openrouter.ai/typesafe):
+
 ```ruby
+# config/initializers/hunch.rb
 Hunch.configure do |config|
-  config.api_key = ENV["TYPESAFE_API_KEY"]
+  config.backend = Hunch::Backends::SystemOne.new(
+    url: "https://openrouter.ai/api/alpha/decisions",
+    api_key: ENV["OPENROUTER_API_KEY"],
+    model: "typesafe/jev-1.13"
+  )
 end
 ```
 
@@ -275,33 +283,24 @@ end
 
 ```ruby
 Hunch.configure do |config|
-  config.api_key = "..."          # default: ENV["TYPESAFE_API_KEY"]
-  config.model = "jev-latest"
-  config.url = "https://api.typesafe.ai/v1/systemone"
-  config.timeout = 5
-  config.open_timeout = 2
-  config.max_retries = 2          # 429/5xx/timeouts, with backoff, honours Retry-After
+  config.backend = Hunch::Backends::SystemOne.new(
+    url: "https://openrouter.ai/api/alpha/decisions",
+    api_key: ENV["OPENROUTER_API_KEY"], # a missing key raises when you ask
+    model: "typesafe/jev-1.13",
+    timeout: 5,                         # seconds to read the response
+    open_timeout: 2,                    # seconds to connect
+    max_retries: 2                      # 429/5xx/timeouts, with backoff, honours Retry-After
+  )
   config.levels[:definitely] = 0.99
 end
 ```
 
 ## Backends
 
-Hunch includes a Jev backend, used by default, and a stub backend for
-[testing](#testing).
-
-### OpenRouter
-
-To call Jev through [OpenRouter](https://openrouter.ai/typesafe), set your
-API key, URL, and model:
-
-```ruby
-Hunch.configure do |config|
-  config.api_key = ENV["OPENROUTER_API_KEY"]
-  config.url = "https://openrouter.ai/api/alpha/decisions"
-  config.model = "typesafe/jev-1.13"
-end
-```
+`Hunch::Backends::SystemOne` talks to any endpoint that speaks the System One
+decisions protocol of noul, choice, and score questions. `Hunch::Backends::Stub`
+is for [testing](#testing). A backend is any object with a
+`decide(state:, questions:)` method that returns `{ "answers" => ... }`.
 
 ## License
 

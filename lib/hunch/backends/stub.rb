@@ -9,7 +9,7 @@ module Hunch
         @calls = []
       end
 
-      def decide(state:, questions:, model: nil)
+      def decide(state:, questions:)
         @calls << { state:, questions: }
         answers = questions.to_h do |key, question|
           [key.to_s, answer_for(key, question)]

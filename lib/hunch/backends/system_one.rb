@@ -4,17 +4,24 @@ require "uri"
 
 module Hunch
   module Backends
-    class Jev
-      def initialize(config = Hunch.configuration, transport: nil, sleeper: nil)
-        @config = config
+    class SystemOne
+      def initialize(url:, api_key:, model:, timeout: 5, open_timeout: 2, max_retries: 2, transport: nil, sleeper: nil)
+        @url = url
+        @api_key = api_key
+        @model = model
+        @timeout = timeout
+        @open_timeout = open_timeout
+        @max_retries = max_retries
         @transport = transport || method(:http_post)
         @sleeper = sleeper || ->(seconds) { sleep(seconds) }
       end
 
-      def decide(state:, questions:, model: nil)
+      def decide(state:, questions:)
+        raise ConfigurationError, "no API key for #{@url}" if @api_key.nil? || @api_key.empty?
+
         payload = {
           "state" => state,
-          "model" => model || @config.model,
+          "model" => @model,
           "questions" => questions.to_h { |key, question| [key.to_s, question.payload] }
         }
         with_retries { handle(*@transport.call(payload)) }
@@ -28,7 +35,7 @@ module Hunch
           attempts += 1
           yield
         rescue RateLimitError, OverloadedError, ServerError, TimeoutError, ConnectionError => e
-          raise if attempts > @config.max_retries
+          raise if attempts > @max_retries
 
           @sleeper.call(e.respond_to?(:retry_after) && e.retry_after || backoff(attempts))
           retry
@@ -65,9 +72,9 @@ module Hunch
       end
 
       def http_post(payload)
-        uri = URI(@config.url)
+        uri = URI(@url)
         request = Net::HTTP::Post.new(uri)
-        request["Authorization"] = "Bearer #{api_key!}"
+        request["Authorization"] = "Bearer #{@api_key}"
         request["Content-Type"] = "application/json"
         request["User-Agent"] = "hunch-ruby/#{VERSION}"
         request.body = JSON.generate(payload)
@@ -75,8 +82,8 @@ module Hunch
         response = Net::HTTP.start(
           uri.host, uri.port,
           use_ssl: uri.scheme == "https",
-          open_timeout: @config.open_timeout,
-          read_timeout: @config.timeout
+          open_timeout: @open_timeout,
+          read_timeout: @timeout
         ) { |http| http.request(request) }
 
         [response.code.to_i, response.each_header.to_h, response.body]
@@ -84,11 +91,6 @@ module Hunch
         raise TimeoutError, e.message
       rescue SocketError, SystemCallError, EOFError, OpenSSL::SSL::SSLError => e
         raise ConnectionError, e.message
-      end
-
-      def api_key!
-        @config.api_key or raise ConfigurationError,
-          "no API key: set TYPESAFE_API_KEY or Hunch.configure { |c| c.api_key = ... }"
       end
     end
   end
