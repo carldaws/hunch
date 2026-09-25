@@ -7,6 +7,6 @@ module StubHelpers
   end
 
   def stub_backend(**answers)
-    Hunch::Backends::Stub.new(**answers).tap { |stub| Hunch.backend = stub }
+    Hunch::Backends::Stub.new(answers).tap { |stub| Hunch.backend = stub }
   end
 end

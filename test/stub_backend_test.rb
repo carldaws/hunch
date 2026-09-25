@@ -11,9 +11,19 @@ class StubBackendTest < Minitest::Test
     assert_match(/no stubbed answer/, error.message)
   end
 
-  def test_default_covers_unstubbed_keys
-    stub_backend(default: 0.5)
+  def test_fallback_covers_unstubbed_keys
+    Hunch.backend = Hunch::Backends::Stub.new({}, fallback: 0.5)
     assert_in_delta 0.5, Hunch.chance("question?", given: "state")
+  end
+
+  def test_any_key_can_be_stubbed
+    Hunch.backend = Hunch::Backends::Stub.new({ default: 0.9, fallback: 0.1 })
+    result = Hunch.decide(given: "state") do |q|
+      q.likely? :default, "?"
+      q.likely? :fallback, "?"
+    end
+    assert_in_delta 0.9, result.default
+    assert_in_delta 0.1, result.fallback
   end
 
   def test_boolean_shorthand_for_noul

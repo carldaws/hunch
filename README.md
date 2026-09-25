@@ -257,7 +257,7 @@ end
 Use the stub backend to supply answers without making API calls:
 
 ```ruby
-Hunch.backend = Hunch::Backends::Stub.new(fraud: 0.95, team: :billing, mood: :calm)
+Hunch.backend = Hunch::Backends::Stub.new({ fraud: 0.95, team: :billing, mood: :calm })
 ```
 
 Use the question's key to supply its answer, or `:answer` for calls outside
@@ -267,12 +267,13 @@ a `Hunch.decide` block. Stub values depend on the method:
 - `pick`: a symbol or a hash of probabilities.
 - `rate`: a level symbol or numeric position.
 
-Missing answers raise unless you supply `default:`. The stub records each
-call in `calls` for assertions.
+Missing answers raise unless you pass a fallback, as in
+`Hunch::Backends::Stub.new({}, fallback: 0.5)`. The stub records each call
+in `calls` for assertions.
 
 ```ruby
 test "spam is dropped without a ticket" do
-  Hunch.backend = Hunch::Backends::Stub.new(answer: :spam)
+  Hunch.backend = Hunch::Backends::Stub.new({ answer: :spam })
   assert_no_difference -> { Ticket.count } do
     receive_inbound_email_from_mail(subject: "You have WON", body: "claim your prize")
   end

@@ -135,7 +135,7 @@ class HunchTest < Minitest::Test
   end
 
   def test_decide_rejects_duplicate_keys
-    stub_backend(default: 0.5)
+    stub_backend
     assert_raises(ArgumentError) do
       Hunch.decide(given: "state") do |q|
         q.likely? :x, "one"
@@ -150,7 +150,7 @@ class HunchTest < Minitest::Test
   end
 
   def test_pick_requires_two_options
-    stub_backend(default: :only)
+    stub_backend
     assert_raises(ArgumentError) do
       Hunch.decide(given: "state") { |q| q.pick :choice, :only }
     end

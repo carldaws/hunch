@@ -11,7 +11,7 @@ module ActiveSupport
     setup { Hunch.reset_configuration! }
 
     def stub_hunch(**answers)
-      Hunch::Backends::Stub.new(**answers).tap { |stub| Hunch.backend = stub }
+      Hunch::Backends::Stub.new(answers).tap { |stub| Hunch.backend = stub }
     end
   end
 end

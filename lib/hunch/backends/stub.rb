@@ -3,9 +3,9 @@ module Hunch
     class Stub
       attr_reader :calls
 
-      def initialize(default: nil, **answers)
+      def initialize(answers = {}, fallback: nil)
         @answers = answers
-        @default = default
+        @fallback = fallback
         @calls = []
       end
 
@@ -20,10 +20,10 @@ module Hunch
       private
 
       def answer_for(key, question)
-        value = @answers.fetch(key, @default)
+        value = @answers.fetch(key, @fallback)
         if value.nil?
           raise MissingStubAnswer,
-            "no stubbed answer for #{key.inspect}: Stub.new(#{key}: ...) or pass default:"
+            "no stubbed answer for #{key.inspect}: Stub.new({ #{key}: ... }) or pass fallback:"
         end
 
         case question.type
