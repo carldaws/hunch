@@ -36,7 +36,7 @@ module Hunch
     end
 
     def chance(question, given:, yes: nil, no: nil)
-      decide(given:) { |q| q.likely?(:answer, question, yes:, no:) }.answer
+      ask({ answer: Questions::Noul.new(key: :answer, question:, yes:, no:, threshold: nil) }, given).answer
     end
 
     Configuration::LEVELS.each_key do |level|

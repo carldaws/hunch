@@ -39,7 +39,7 @@ module Hunch
       end
 
       set(key, probability.to_f)
-      define(:"#{key}?") { probability >= question.threshold }
+      define(:"#{key}?") { probability >= question.threshold } if question.threshold
     end
 
     def build_choice(key, question, raw)
