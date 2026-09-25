@@ -15,7 +15,8 @@ You can get a probability, choose between options, or rate something on a
 scale. Questions are written in plain English; answers come back as Ruby values.
 
 Hunch asks a System One model, such as [TypeSafe's Jev](https://typesafe.ai),
-which answers with calibrated probabilities rather than text.
+which answers with calibrated probabilities rather than text. It is also
+available for TypeScript as [`@carldaws/hunch`](https://github.com/carldaws/hunch-ts).
 
 ## Installation
 
