@@ -5,6 +5,7 @@ module Hunch
   class AuthenticationError < Error; end
   class ValidationError < Error; end
   class APIError < Error; end
+  class InvalidAnswerError < APIError; end
   class ServerError < APIError; end
   class OverloadedError < APIError; end
   class TimeoutError < APIError; end

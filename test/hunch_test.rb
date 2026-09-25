@@ -167,4 +167,42 @@ class HunchTest < Minitest::Test
     error = assert_raises(Hunch::ConfigurationError) { Hunch.chance("question?", given: "state") }
     assert_match(/no backend/, error.message)
   end
+
+  def test_answer_outside_the_options_raises
+    Hunch.backend = answering("team" => { "type" => "choice", "choice" => "legal" })
+    error = assert_raises(Hunch::InvalidAnswerError) do
+      Hunch.decide(given: "state") { |q| q.pick :team, :billing, :technical }
+    end
+    assert_equal "team needs one of billing, technical, got :legal", error.message
+  end
+
+  def test_missing_probability_raises
+    Hunch.backend = answering("urgent" => { "type" => "noul" })
+    error = assert_raises(Hunch::InvalidAnswerError) { Hunch.decide(given: "state") { |q| q.likely? :urgent, "?" } }
+    assert_equal "urgent needs a probability, got nil", error.message
+  end
+
+  def test_probability_out_of_range_raises
+    Hunch.backend = answering("urgent" => { "type" => "noul", "noul" => 1.4 })
+    assert_raises(Hunch::InvalidAnswerError) { Hunch.decide(given: "state") { |q| q.likely? :urgent, "?" } }
+  end
+
+  def test_missing_position_raises
+    Hunch.backend = answering("mood" => { "type" => "score", "score" => nil })
+    error = assert_raises(Hunch::InvalidAnswerError) { Hunch.decide(given: "state") { |q| q.rate :mood, :calm, :livid } }
+    assert_equal "mood needs a position, got nil", error.message
+  end
+
+  def test_missing_answer_is_an_api_error
+    Hunch.backend = answering({})
+    assert_raises(Hunch::APIError) { Hunch.chance("question?", given: "state") }
+  end
+
+  private
+
+  def answering(answers)
+    Object.new.tap do |backend|
+      backend.define_singleton_method(:decide) { |state:, questions:| { "answers" => answers } }
+    end
+  end
 end

@@ -295,6 +295,14 @@ Hunch.configure do |config|
 end
 ```
 
+## Errors
+
+`Hunch::APIError` covers failures worth working around: timeouts, lost
+connections, rate limits, server errors, and answers the backend got wrong
+(`Hunch::InvalidAnswerError`). `AuthenticationError`, `ValidationError`, and
+`ConfigurationError` mean your setup needs fixing, so they are not
+`APIError`s.
+
 ## Backends
 
 `Hunch::Backends::SystemOne` talks to any endpoint that speaks the System One

@@ -8,7 +8,7 @@ module Hunch
       @values = {}
       questions.each do |key, question|
         raw = answers[key.to_s] || answers[key]
-        raise Error, "backend returned no answer for #{key}" unless raw
+        raise InvalidAnswerError, "backend returned no answer for #{key}" unless raw
 
         build(key, question, raw)
       end
@@ -25,26 +25,38 @@ module Hunch
     def build(key, question, raw)
       case question.type
       when :noul then build_noul(key, question, raw)
-      when :choice then build_choice(key, raw)
+      when :choice then build_choice(key, question, raw)
       when :rate then build_rate(key, question, raw)
       end
     end
 
     def build_noul(key, question, raw)
-      probability = raw["noul"].to_f
-      set(key, probability)
+      probability = raw["noul"]
+      unless probability.is_a?(Numeric) && probability.between?(0, 1)
+        raise InvalidAnswerError, "#{key} needs a probability, got #{probability.inspect}"
+      end
+
+      set(key, probability.to_f)
       define(:"#{key}?") { probability >= question.threshold }
     end
 
-    def build_choice(key, raw)
+    def build_choice(key, question, raw)
       probabilities = (raw["probabilities"] || {}).transform_keys(&:to_sym)
       choice = raw["choice"]&.to_sym || probabilities.max_by { |_, p| p }&.first
+      unless question.options.key?(choice)
+        raise InvalidAnswerError, "#{key} needs one of #{question.options.keys.join(", ")}, got #{choice.inspect}"
+      end
+
       set(key, choice)
       define(:"#{key}_probabilities") { probabilities }
       define(:"#{key}_confidence") { raw["confidence"] }
     end
 
     def build_rate(key, question, raw)
+      unless raw["score"].is_a?(Numeric) && raw["score"].finite?
+        raise InvalidAnswerError, "#{key} needs a position, got #{raw["score"].inspect}"
+      end
+
       levels = question.levels.keys
       by_index = raw["probabilities"] || {}
       probabilities = levels.each_with_index.to_h do |level, i|

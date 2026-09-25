@@ -115,4 +115,9 @@ class SystemOneBackendTest < Minitest::Test
       assert_equal "no API key for https://example.test/decisions", error.message
     end
   end
+
+  def test_invalid_json_is_an_api_error
+    jev = backend(transport: ->(_p) { [200, {}, "<html>gateway</html>"] })
+    assert_raises(Hunch::APIError) { jev.decide(state: "s", questions: questions) }
+  end
 end

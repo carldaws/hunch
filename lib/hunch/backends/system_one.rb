@@ -48,7 +48,7 @@ module Hunch
 
       def handle(status, headers, body)
         case status
-        when 200..299 then JSON.parse(body)
+        when 200..299 then parse(body)
         when 401 then raise AuthenticationError, error_message(body, "missing or invalid API key")
         when 422 then raise ValidationError, error_message(body, "invalid request")
         when 429 then raise RateLimitError.new(error_message(body, "rate limited"), retry_after: retry_after(headers))
@@ -56,6 +56,12 @@ module Hunch
         when 500..599 then raise ServerError, "server error (#{status})"
         else raise APIError, error_message(body, "unexpected response (#{status})")
         end
+      end
+
+      def parse(body)
+        JSON.parse(body)
+      rescue JSON::ParserError, TypeError
+        raise APIError, "response was not valid JSON"
       end
 
       def error_message(body, fallback)
