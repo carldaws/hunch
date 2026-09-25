@@ -1,5 +1,7 @@
 module Hunch
   class Result
+    RESERVED_KEYS = %i[model usage to_h].freeze
+
     attr_reader :model, :usage
 
     def initialize(questions:, answers:, model: nil, usage: nil)

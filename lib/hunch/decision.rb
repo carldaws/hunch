@@ -56,6 +56,9 @@ module Hunch
     end
 
     def add(question)
+      if Result::RESERVED_KEYS.include?(question.key)
+        raise ArgumentError, "#{question.key} is reserved on results; choose another key"
+      end
       raise ArgumentError, "duplicate question key #{question.key}" if @questions.key?(question.key)
 
       @questions[question.key] = question

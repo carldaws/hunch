@@ -163,6 +163,14 @@ class HunchTest < Minitest::Test
     assert_equal %i[urgent], result.to_h.keys
   end
 
+  def test_decide_rejects_keys_reserved_on_results
+    stub_backend
+    %i[model usage to_h].each do |key|
+      error = assert_raises(ArgumentError) { Hunch.decide(given: "state") { |q| q.likely? key, "?" } }
+      assert_equal "#{key} is reserved on results; choose another key", error.message
+    end
+  end
+
   def test_missing_backend_raises
     error = assert_raises(Hunch::ConfigurationError) { Hunch.chance("question?", given: "state") }
     assert_match(/no backend/, error.message)
